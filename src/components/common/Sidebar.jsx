@@ -24,10 +24,10 @@ const Sidebar = () => {
 
   })
 
-  const { data: authUser } = useQuery({ queryKey: ['authUser'] })
+  const authUser = queryClient.getQueryData(['authUser']);
 
   return (
-    <header className="w-[275px] px-[8px]">
+    <header className="w-[270px] px-[8px]">
       <div className="w-[259px] h-screen flex flex-col fixed">
         <Link to='/' className="flex w-[52px] h-[52px] justify-center items-center rounded-full transition-all duration-300 hover:bg-stone-900">
           <XSvg className='w-[30px] h-[30px] fill-white' />
@@ -57,7 +57,7 @@ const Sidebar = () => {
           <div className='mt-auto mb-[12px] p-[12px] flex rounded-full transition-all duration-300 hover:bg-stone-900'>
             <div className='avatar hidden md:flex'>
               <div className='w-[40px] rounded-full'>
-                <img src={authUser?.profileImg || "/avatar-placeholder.png"} />
+                <img src={authUser?.profileImg || "/avatar-placeholder.png"} alt="profile img" />
               </div>
             </div>
             <div className='max-w-[152px] flex flex-col justify-between flex-1 mx-[12px]'>

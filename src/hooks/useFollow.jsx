@@ -6,18 +6,20 @@ const useFollow = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: follow, isPending } = useMutation({
+  const { mutate: follow } = useMutation({
+    reset: false,
     mutationFn: fetchFollow,
     onSuccess: () => {
+
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ['suggestedUsers'] }),
-        queryClient.invalidateQueries({ queryKey: ['authUser'] })
+        queryClient.invalidateQueries({ queryKey: ['authUser'] }),
       ])
     },
     onError: (error) => toast.error(error.response.data.error),
   });
 
-  return { follow, isPending }
+  return { follow }
 }
 
 export default useFollow;

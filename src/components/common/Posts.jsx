@@ -1,9 +1,7 @@
 import Post from "./Post";
-import PostSkeleton from "../skeletons/PostSkeleton";
-import { POSTS } from "../../utils/db/dummy";
 import { useQuery } from "@tanstack/react-query";
 import { getPosts } from "../../api/posts";
-import { useEffect } from "react";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Posts = ({ feedType, username, userId }) => {
 
@@ -24,29 +22,20 @@ const Posts = ({ feedType, username, userId }) => {
 
   const POST_ENDPOINT = getPostEndpoint();
 
-  const { data: posts, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ['posts'],
+  const { data: posts, isLoading } = useQuery({
+    queryKey: ['posts', feedType, username],
     queryFn: () => getPosts(POST_ENDPOINT),
   })
 
-  useEffect(() => {
-    refetch()
-
-  }, [feedType, refetch])
-
-  console.log(posts);
-
   return (
     <>
-      {(isLoading || isRefetching) && (
-        <div className='flex flex-col justify-center'>
-          <PostSkeleton />
-          <PostSkeleton />
-          <PostSkeleton />
+      {isLoading && (
+        <div className="py-[20px] flex justify-center items-center">
+          < LoadingSpinner />
         </div>
       )}
-      {!isLoading && !isRefetching && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
-      {!isLoading && !isRefetching && posts && (
+      {!isLoading && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
+      {!isLoading && posts && (
         <div>
           {posts.map((post) => (
             <Post key={post._id} post={post} />

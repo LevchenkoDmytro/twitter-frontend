@@ -1,6 +1,6 @@
 import { instance } from "./helpers/instance";
 
-export const getPosts = async (POST_ENDPOINT) => {
+export const getPosts = async (POST_ENDPOINT) => {  
   const { data } = await instance(POST_ENDPOINT);
   return data;
 };

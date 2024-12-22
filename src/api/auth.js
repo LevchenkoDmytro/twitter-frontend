@@ -16,10 +16,9 @@ export const logout = async () => {
     return data;
 };
 
-export const userInfo = async () => {
-    try {
-        console.log('auth');
-        
+export const userInfo = async () => {  
+    
+    try {        
         const { data } = await instance('auth/userInfo');  
         return data;
     } catch (error) {

@@ -10,24 +10,30 @@ import { fetchDeletePost, fetchLikePost, fetchCommentPost } from '../../api/post
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
+import { MdMoreHoriz } from "react-icons/md";
+
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
+
   const queryClient = useQueryClient();
-  const { data: authUser } = useQuery({ queryKey: ['authUser'] });
+  const authUser = queryClient.getQueryData(['authUser']);
 
   const postOwner = post.user;
   const isLiked = post.likes.includes(authUser._id);
 
   const isMyPost = authUser._id === post.user._id;
 
+
   const formattedDate = formatPostDate(post.createdAt)
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: () => fetchDeletePost(post._id),
-    onSuccess: () => {
-      toast.success('Post deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    onSuccess: (deletePostId) => {
+      toast.success('Post deleted successfully');
+      queryClient.setQueryData(['posts'], (oldPosts) => {
+        return oldPosts.filter(post => post._id !== deletePostId)
+      })
     }
   })
 
@@ -78,30 +84,42 @@ const Post = ({ post }) => {
 
     <div className='flex gap-2 items-start p-4 border-b border-gray-700'>
       <div className='avatar'>
-        <Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
-          <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+        <Link to={`/profile/${postOwner.username}`} state={postOwner} className='w-[40px] h-[40px] rounded-full overflow-hidden'>
+          <img src={postOwner.profileImg || "/avatar-placeholder.png"} alt="avatar" />
         </Link>
       </div>
       <div className='flex flex-col flex-1'>
-        <div className='flex gap-2 items-center'>
-          <Link to={`/profile/${postOwner.username}`} className='font-bold'>
-            {postOwner.fullName}
+        <div className='flex items-center'>
+          <Link to={`/profile/${postOwner.username}`} state={postOwner}>
+            <div className="flex gap-2 items-center">
+              <span className='font-bold'>{postOwner.fullName}</span>
+              <span className='text-gray-700 text-sm'>@{postOwner.username}</span>
+            </div>
           </Link>
-          <span className='text-gray-700 flex gap-1 text-sm'>
-            <Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
-            <span>·</span>
+          <span className='flex text-gray-700 text-sm'>
+            <span className="mx-1">·</span>
             <span>{formattedDate}</span>
           </span>
           {isMyPost && (
             <span className='flex justify-end flex-1'>
               {!isDeleting && <FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />}
-
+              <MdMoreHoriz size={'19px'} fill="rgb(100, 116, 139)" onClick={() => document.getElementById('my_modal').showModal()} />
+              <dialog id="my_modal" className="modal ">
+                <div className="modal-box border rounded-md border-gray-700 shadow-md">
+                  <h3 className="font-bold text-lg">Hello!</h3>
+                  <p className="py-4">Press ESC key or click outside to close</p>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                  <button className='outline-none'>close</button>
+                </form>
+              </dialog>
               {isDeleting && <LoadingSpinner size='sm' />}
             </span>
           )}
         </div>
-        <div className='flex flex-col gap-3 overflow-hidden'>
-          <span>{post.text}</span>
+        <div className='flex flex-col gap-3'>
+          <p className="w-[518px] break-words">{post.text}</p>
+
           {post.img && (
             <img
               src={post.img}
@@ -121,7 +139,6 @@ const Post = ({ post }) => {
                 {post.comments.length}
               </span>
             </div>
-            {/* We're using Modal Component from DaisyUI */}
             <dialog id={`comments_modal${post._id}`} className='modal border-none outline-none'>
               <div className='modal-box rounded border border-gray-600'>
                 <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
